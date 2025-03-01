@@ -23,6 +23,7 @@ async def process_message(message):
                 "You are an expert in computer algebra systems. "
                 "I have provided a base64 encoded image containing a mathematical expression. "
                 "Your task is to extract the mathematical expression and convert it into the syntax for the symbolic mathematics package Maxima."
+                "Make special care of subscripts which should be written using an underscore if you find a subscript."
                 "Return only the Maxima code with no additional text, explanations, or formatting."
             )
             messages = [
