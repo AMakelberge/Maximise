@@ -14,7 +14,7 @@ def preprocess_image(image_path, max_size=(800, 500), quality=50):
     return base64.b64encode(small_image_data).decode("utf-8")
 
 async def send_image(image_path):
-    uri = "ws://localhost:8765"
+    uri = "ws://10.99.45.201:8765"
     async with websockets.connect(uri) as websocket:
         # Preprocess the image and get a base64-encoded string
         encoded_image = preprocess_image(image_path)
