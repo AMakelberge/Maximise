@@ -58,6 +58,7 @@ async def handler(websocket):
     async for message in websocket:
         print("Received message")
         response = await process_message(message)
+        print(response)
         await websocket.send(response)
 
 async def main():
