@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Draw Equation to Maxima Code</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <!-- Load Brython and its standard library -->
+  <script src="https://cdn.jsdelivr.net/npm/brython@3.10.5/brython.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/brython@3.10.5/brython_stdlib.js"></script>
+</head>
+<body onload="brython()">
+  <h1>Draw Your Equation</h1>
+  <canvas id="canvas" width="500" height="200"></canvas>
+  <button id="submitBtn">Submit Equation</button>
+  <h2>Maxima Code</h2>
+  <div id="maximaCode">Waiting for response...</div>
+
+  <!-- Load the client Python code -->
+  <script type="text/python" src="main.py"></script>
+</body>
+</html>

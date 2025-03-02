@@ -5,6 +5,9 @@ import base64
 from PIL import Image
 import io
 
+def do_main_part(image_path):
+    asyncio.run(send_image(image_path))
+
 def preprocess_image(image_path, max_size=(800, 500), quality=50):
     with Image.open(image_path) as img:
         img.thumbnail(max_size)
@@ -36,7 +39,7 @@ async def send_image(image_path):
         else:
             print("Error:", response_data.get("message"))
 
-if __name__ == "__main__":
-    # Replace with the path to your image file containing the mathematical expression
-    image_path = "images/bigBoi.jpg"
-    asyncio.run(send_image(image_path))
+# if __name__ == "__main__":
+#     # Replace with the path to your image file containing the mathematical expression
+#     image_path = "client/images/quadratic.jpg"
+#     asyncio.run(send_image(image_path))

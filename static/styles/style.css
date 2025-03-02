@@ -1,0 +1,29 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    text-align: center;
+    align-content: center;
+  }
+  
+  canvas {
+    display: block;
+    margin-bottom: 10px;
+    cursor: crosshair;
+    border: 2px solid black;
+    touch-action: none;
+  }
+  
+  #maximaCode {
+    white-space: pre-wrap;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 10px;
+  }
+
+button {
+    margin-top: 10px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}

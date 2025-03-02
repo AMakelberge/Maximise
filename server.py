@@ -5,52 +5,45 @@ from openai import OpenAI
 import re
 from dotenv import load_dotenv
 import os
+import base64
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-import base64
 
-# Set your ChatGPT API token
-
-async def process_message(message):
+async def process_message(data):
     try:
-        msg = json.loads(message)
-        action = msg.get("action")
-        data = msg.get("data")
-        if action == "upload_image":
-            # Build a prompt instructing ChatGPT to extract and convert the math to Maxima code.
-            prompt = (
-                "You are an expert in computer algebra systems. "
-                "I have provided a base64 encoded image containing a mathematical expression. "
-                "Your task is to extract the mathematical expression and convert it into the syntax for the symbolic mathematics package Maxima."
-                "Make special care of subscripts which should be written using an underscore if you find a subscript."
-                "Return only the Maxima code with no additional text, explanations, or formatting."
-            )
-            messages = [
-                {"role": "system", "content": "You are a helpful assistant that outputs only code when requested."},
-                {"role": "user", 
-                 "content": [
-                     {
-                         "type": "text",
-                         "text": f"{prompt}"
-                     },
-                     {
-                         "type": "image_url",
-                         "image_url": {
-                             "url": f"data:image/jpeg;base64,{data}"
-                         }
-                     }
-                 ]}
-            ]
-            response = client.chat.completions.create(model="gpt-4o",  # use a model you have access to
-            messages=messages,
-            temperature=0.0)
-            reply = response.choices[0].message.content.strip()
-            reply = re.sub(r"^```(?:\w+)?\s*", "", reply)
-            reply = re.sub(r"\s*```$", "", reply).replace(" ","")
-            return json.dumps({"status": "success", "reply": reply})
-        else:
-            return json.dumps({"status": "error", "message": "Unknown action"})
+        # Build a prompt instructing ChatGPT to extract and convert the math to Maxima code.
+        prompt = (
+            "You are an expert in computer algebra systems. "
+            "I have provided a base64 encoded image containing a mathematical expression. "
+            "Your task is to extract the mathematical expression and convert it into the syntax for the symbolic mathematics package Maxima."
+            "Make special care of subscripts which should be written using an underscore if you find a subscript."
+            "Return only the Maxima code with no additional text, explanations, or formatting."
+        )
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant that outputs only code when requested."},
+            {"role": "user", 
+                "content": [
+                    {
+                        "type": "text",
+                        "text": f"{prompt}"
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{data}"
+                        }
+                    }
+                ]}
+        ]
+        response = client.chat.completions.create(model="gpt-4o",  # use a model you have access to
+        messages=messages,
+        temperature=0.0)
+        print('rep received')
+        reply = response.choices[0].message.content.strip()
+        reply = re.sub(r"^```(?:\w+)?\s*", "", reply)
+        reply = re.sub(r"\s*```$", "", reply).replace(" ","").replace(";","")
+        return json.dumps({"status": "success", "reply": reply})
     except Exception as e:
         return json.dumps({"status": "error", "message": str(e)})
 
@@ -66,5 +59,13 @@ async def main():
         print("Server started on ws://172.20.10.2:8765")
         await asyncio.Future()  # Run forever
 
+async def test_process_message():
+    with open("static/images/image.jpg", "rb") as i:
+        bytes = i.read()
+        r = await process_message(base64.b64encode(bytes).decode('utf-8'))
+        print(r)
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(test_process_message())
+    # asyncio.run(main())
+
