@@ -59,12 +59,24 @@ function stopDrawing(event) {
 
 // Define getPosition to extract the correct coordinates from the event.
 function getPosition(event) {
-    let rect = canvas.getBoundingClientRect();
-    // For touch events, use the first touch's clientX/clientY.
-    let x = isTouchDevice ? event.touches[0].clientX - rect.left : event.clientX - rect.left;
-    let y = isTouchDevice ? event.touches[0].clientY - rect.top : event.clientY - rect.top;
+    const rect = canvas.getBoundingClientRect();
+    let clientX, clientY;
+    if (isTouchDevice) {
+      clientX = event.touches[0].clientX;
+      clientY = event.touches[0].clientY;
+    } else {
+      clientX = event.clientX;
+      clientY = event.clientY;
+    }
+    // Calculate scale factors
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    // Adjust the coordinates based on the scaling factors.
+    const x = (clientX - rect.left) * scaleX;
+    const y = (clientY - rect.top) * scaleY;
     return { x, y };
-}
+  }
+  
 
 //submitButton.addEventListener("click", sendDrawing)
 function sendDrawing() {

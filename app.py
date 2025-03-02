@@ -52,11 +52,10 @@ def process_message(data):
         reply = response.choices[0].message.content.strip()
         reply = re.sub(r"^```(?:\w+)?\s*", "", reply)
         reply = re.sub(r"\s*```$", "", reply).replace(" ", "").replace(";", "")
-        print(reply)
-
+        if reply.startswith("(expr:"):
+            reply = reply.replace("(expr:","")[:-1]
         # Convert Maxima code to LaTeX
         latex_result = maxima_to_latex(reply)
-        print(latex_result)
 
         return {"status": "success", "reply": reply, "latex": latex_result}
     except Exception as e:
@@ -75,8 +74,6 @@ def maxima_to_latex(expression):
             return latex_output
         else:
             return result
-        print(result.stdout)
-        return result.stdout
     except Exception as e:
         return f"Error processing LaTeX: {e}"
 
