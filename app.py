@@ -8,7 +8,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import subprocess
 
-load_dotenv()
+load_dotenv(override=True)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = Flask(__name__)
@@ -45,7 +45,7 @@ def process_message(data):
                 ]}
         ]
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4o-mini",
             messages=messages,
             temperature=0.0
         )
@@ -63,17 +63,23 @@ def process_message(data):
         return {"status": "error", "message": str(e)}
 
 def maxima_to_latex(expression):
-    try:
-        # Run Maxima and convert the expression to LaTeX
-        maxima_input = f"tex({expression});"
-        result = subprocess.run(["maxima", "--very-quiet", "-r", maxima_input], capture_output=True, text=True)
 
-        output = result.stdout.strip()
-        if "Maxima" in output or "error" in output.lower():
-            return "Error in rendering."
-        return output
+    try:
+        maxima_code = f'apply(tex, [{expression}]);'
+
+        result = subprocess.run(["maxima", "--batch-string", maxima_code], capture_output=True, text=True)
+        
+        match = re.search(r"\$\$(.*?)\$\$", result.stdout, re.DOTALL)
+        if match:
+            latex_output = "\[" + match.group(1).strip() + "\]"
+            return latex_output
+        else:
+            return result
+        print(result.stdout)
+        return result.stdout
     except Exception as e:
-        return f"Error processing LaTeX: {str(e)}"
+        return f"Error processing LaTeX: {e}"
+
 
 @socketio.on('send_image')
 def handle_send_image(data):
@@ -89,6 +95,8 @@ def handle_send_image(data):
         base64_str = base64.b64encode(image_bytes).decode('utf-8')
         
         result = process_message(base64_str)
+        print('result processed')
+        print(result)
         emit("maxima_code", result)
     except Exception as e:
         emit("maxima_code", {"status": "error", "message": str(e)})

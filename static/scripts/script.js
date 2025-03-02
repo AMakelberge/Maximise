@@ -3,6 +3,7 @@ let ctx = canvas.getContext("2d");
 let codeField = document.getElementById("maximaCode");
 let renderedField = document.getElementById("maximaRendered");
 let clearButton = document.getElementById("clearButton");
+let submitButton = document.getElementById("submitButton");
 
 const socket = io();
 
@@ -65,6 +66,7 @@ function getPosition(event) {
     return { x, y };
 }
 
+//submitButton.addEventListener("click", sendDrawing)
 function sendDrawing() {
     if (isProcessing) return;
     let imageData = canvas.toDataURL("image/png");
@@ -74,13 +76,15 @@ function sendDrawing() {
 
 socket.on("maxima_code", function(data) {
     isProcessing = false;
+    console.log(data.reply)
     codeField.innerText = data.reply;
-    renderedField.innerHTML = `$$${data.latex}$$`;
+    renderedField.innerHTML = `${data.latex}`;
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById("maximaRendered")]);
     MathJax.typeset();
 });
 
 clearButton.addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    codeField.innerText = "Awaiting input.";
-    renderedField.innerHTML = `Awaiting input.`;
+    codeField.innerText = "Awaiting Input.";
+    renderedField.innerHTML = `Awaiting Input.`;
 });

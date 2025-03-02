@@ -6,19 +6,38 @@
     <title>Draw and Save</title>
     <link rel="stylesheet" type="text/css" href="static/styles/style.css">
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+          tex2jax: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true
+          },
+          messageStyle: "none"
+        });
+      </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
-    <h2>Draw Here</h2>
-    <canvas id="drawCanvas"></canvas>
-    <br>
-    <button id="clearButton">Clear</button>
-    
-    <h3>Maxima Code:</h3>
-    <p id="maximaCode">Awaiting Input</p>
-
-    <h3>Rendered Output:</h3>
-    <p id="maximaRendered">Awaiting Input</p>
+    <div className="boxes">
+        <h1 className="title">Maximise</h1>
+        
+        <div className="canvasBox">
+            <h2>Draw Here</h2>
+            <canvas id="drawCanvas"></canvas>
+            <br>
+            <button id="clearButton">Clear</button>
+            <!-- <button id="submitButton">Submit</button> -->
+        </div>
+        <div className="maximaCodeBox">
+            <h3>Maxima Code:</h3>
+            <p id="maximaCode">Awaiting Input.</p>
+        </div>
+        <div className="renderedCodeBox">
+            <h3>Simplified Rendered Output:</h3>
+            <p id="maximaRendered">Awaiting Input.</p>
+        </div>
+      </div>
 
     <script type="module" src="static/scripts/script.js"></script>
 </body>
