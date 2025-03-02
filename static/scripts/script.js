@@ -1,14 +1,21 @@
 let canvas = document.getElementById("drawCanvas");
 let ctx = canvas.getContext("2d");
-let drawing = false;
-let codeField = document.getElementById("maximaCode")
-let confirmButton = document.getElementById("confirmButton")
-let clearButton = document.getElementById("clearButton")
+let codeField = document.getElementById("maximaCode");
+let clearButton = document.getElementById("clearButton");
+let savedImage = document.getElementById("savedImage")
 
-// Detect if the device is touch-based (iPad, iPhone, etc.)
+const socket = io();
+
+// Debounce timer to control how often we send updates
+let debounceTimer;
+const DEBOUNCE_DELAY = 2000; // milliseconds
+
+// Detect if the device is touch-based
 let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints;
 
 // Event listeners for drawing
+let drawing = false;
+
 if (isTouchDevice) {
     canvas.addEventListener("touchstart", startDrawing);
     canvas.addEventListener("touchmove", draw);
@@ -24,13 +31,15 @@ function startDrawing(event) {
     ctx.beginPath();
     let pos = getPosition(event);
     ctx.moveTo(pos.x, pos.y);
+    // Clear any pending debounce when starting a new stroke
+    clearTimeout(debounceTimer);
 }
 
 function draw(event) {
     if (!drawing) return;
     let pos = getPosition(event);
     ctx.lineTo(pos.x, pos.y);
-    ctx.strokeStyle = "black";  // Drawing color
+    ctx.strokeStyle = "black";
     ctx.lineWidth = 3;
     ctx.lineCap = "round";
     ctx.stroke();
@@ -39,7 +48,9 @@ function draw(event) {
 function stopDrawing() {
     drawing = false;
     ctx.closePath();
-    //saveDrawing()
+    // Debounce sending the image data until after a pause in drawing
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(sendDrawing, DEBOUNCE_DELAY);
 }
 
 function getPosition(event) {
@@ -49,41 +60,25 @@ function getPosition(event) {
     return { x, y };
 }
 
-clearButton.addEventListener("click", clearCanvas)
+function sendDrawing() {
+    let imageData = canvas.toDataURL("image/png");
+    savedImage.src = imageData
+    // Emit the image data to the server via websocket
+    socket.emit("send_image", { image: imageData });
+}
+
+// Listen for the server's response and update the maximaCode field.
+socket.on("maxima_code", function(data) {
+    if (data.status === "success") {
+        codeField.innerText = data.reply;
+    } else {
+        codeField.innerText = "Error: " + data.message;
+    }
+});
+
+clearButton.addEventListener("click", clearCanvas);
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-confirmButton.addEventListener("click", saveDrawing)
-function saveDrawing() {
-    let imageData = canvas.toDataURL("image/png"); // Convert drawing to JPEG
-    fetch("/save", {
-        method: "POST",
-        body: JSON.stringify({ image: imageData }),
-        headers: { "Content-Type": "application/json" }
-    })
-    .then(response => response.json())
-    .then(data => {
-         document.getElementById("savedImage").src = imageData;
-         document.getElementById("maximaCode").innerText = data.maximaCode.reply;
-    })
-    .catch(error => console.error("Error saving image:", error));
-}
-
-async function preprocessImage(imagePath, maxSize = { width: 800, height: 500 }, quality = 50) {
-    try {
-      const buffer = await sharp(imagePath)
-        .resize(maxSize.width, maxSize.height, { fit: 'inside' })
-        .jpeg({ quality: quality })
-        .toBuffer();
-      return buffer;
-    } catch (error) {
-      console.error('Error processing image:', error);
-      throw error;
-    }
-  }
-
-function updateMaximaCode(code){
-    console.log(code.minimaCode.reply)
-    codeField.innerHtml = code
+    // Optionally clear the output field when clearing the canvas
+    codeField.innerText = "Awaiting Input";
 }
