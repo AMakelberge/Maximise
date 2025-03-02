@@ -1,4 +1,4 @@
-# UCLHackathon
+# Maximise
 
 How to run:
 ```bash
