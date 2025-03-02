@@ -54,11 +54,6 @@ async def handler(websocket):
         print(response)
         await websocket.send(response)
 
-async def main():
-    async with websockets.serve(handler, "0.0.0.0", 8765):
-        print("Server started on ws://172.20.10.2:8765")
-        await asyncio.Future()  # Run forever
-
 async def test_process_message():
     with open("static/images/image.jpg", "rb") as i:
         bytes = i.read()
@@ -67,5 +62,3 @@ async def test_process_message():
 
 if __name__ == "__main__":
     asyncio.run(test_process_message())
-    # asyncio.run(main())
-
