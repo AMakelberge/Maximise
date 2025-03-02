@@ -5,19 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Draw and Save</title>
     <link rel="stylesheet" type="text/css" href="static/styles/style.css">
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <!-- <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script> -->
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
     <h2>Draw Here</h2>
     <canvas id="drawCanvas" width="500" height="300"></canvas>
     <br>
     <button id="clearButton">Clear</button>
-    <button id="confirmButton">Confirm &amp; Save</button>
     
+    <h3>Maxima Code:</h3>
     <p id="maximaCode">Awaiting Input</p>
 
-    <img id="savedImage" alt="Your drawing will appear here" style="margin-top: 20px; max-width: 100%;">
+    <h3>Rendered Output:</h3>
+    <p id="maximaRendered">Awaiting Input</p>
 
-    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
     <script type="module" src="static/scripts/script.js"></script>
 </body>
 </html>

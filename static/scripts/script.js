@@ -1,20 +1,16 @@
 let canvas = document.getElementById("drawCanvas");
 let ctx = canvas.getContext("2d");
 let codeField = document.getElementById("maximaCode");
+let renderedField = document.getElementById("maximaRendered");
 let clearButton = document.getElementById("clearButton");
-let savedImage = document.getElementById("savedImage")
 
 const socket = io();
 
-// Debounce timer to control how often we send updates
 let debounceTimer;
-const DEBOUNCE_DELAY = 2000; // milliseconds
-
-// Detect if the device is touch-based
-let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints;
-
-// Event listeners for drawing
+const DEBOUNCE_DELAY = 500;
+let isProcessing = false;
 let drawing = false;
+let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints;
 
 if (isTouchDevice) {
     canvas.addEventListener("touchstart", startDrawing);
@@ -31,7 +27,6 @@ function startDrawing(event) {
     ctx.beginPath();
     let pos = getPosition(event);
     ctx.moveTo(pos.x, pos.y);
-    // Clear any pending debounce when starting a new stroke
     clearTimeout(debounceTimer);
 }
 
@@ -45,40 +40,36 @@ function draw(event) {
     ctx.stroke();
 }
 
-function stopDrawing() {
+function stopDrawing(event) {
     drawing = false;
     ctx.closePath();
-    // Debounce sending the image data until after a pause in drawing
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(sendDrawing, DEBOUNCE_DELAY);
 }
 
+// Define getPosition to extract the correct coordinates from the event.
 function getPosition(event) {
     let rect = canvas.getBoundingClientRect();
+    // For touch events, use the first touch's clientX/clientY.
     let x = isTouchDevice ? event.touches[0].clientX - rect.left : event.clientX - rect.left;
     let y = isTouchDevice ? event.touches[0].clientY - rect.top : event.clientY - rect.top;
     return { x, y };
 }
 
 function sendDrawing() {
+    if (isProcessing) return;
     let imageData = canvas.toDataURL("image/png");
-    savedImage.src = imageData
-    // Emit the image data to the server via websocket
+    isProcessing = true;
     socket.emit("send_image", { image: imageData });
 }
 
-// Listen for the server's response and update the maximaCode field.
 socket.on("maxima_code", function(data) {
-    if (data.status === "success") {
-        codeField.innerText = data.reply;
-    } else {
-        codeField.innerText = "Error: " + data.message;
-    }
+    isProcessing = false;
+    codeField.innerText = data.reply;
+    renderedField.innerHTML = `$$${data.latex}$$`;
+    MathJax.typeset();
 });
 
-clearButton.addEventListener("click", clearCanvas);
-function clearCanvas() {
+clearButton.addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Optionally clear the output field when clearing the canvas
-    codeField.innerText = "Awaiting Input";
-}
+});

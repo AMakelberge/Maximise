@@ -6,13 +6,14 @@ from io import BytesIO
 from PIL import Image
 from openai import OpenAI
 from dotenv import load_dotenv
+import subprocess
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, async_mode="eventlet")  # Requires eventlet or gevent installed
+socketio = SocketIO(app, async_mode="eventlet")
 
 @app.route("/")
 def index():
@@ -20,7 +21,6 @@ def index():
 
 def process_message(data):
     try:
-        # Build a prompt instructing ChatGPT to extract and convert the math to Maxima code.
         prompt = (
             "You are an expert in computer algebra systems. "
             "I have provided a base64 encoded image containing a mathematical expression. "
@@ -45,24 +45,40 @@ def process_message(data):
                 ]}
         ]
         response = client.chat.completions.create(
-            model="gpt-4o",  # Ensure you have access to this model
+            model="gpt-4o",
             messages=messages,
             temperature=0.0
         )
         reply = response.choices[0].message.content.strip()
-        # Remove code block formatting and extra characters
         reply = re.sub(r"^```(?:\w+)?\s*", "", reply)
         reply = re.sub(r"\s*```$", "", reply).replace(" ", "").replace(";", "")
-        return {"status": "success", "reply": reply}
+        print(reply)
+
+        # Convert Maxima code to LaTeX
+        latex_result = maxima_to_latex(reply)
+        print(latex_result)
+
+        return {"status": "success", "reply": reply, "latex": latex_result}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+def maxima_to_latex(expression):
+    try:
+        # Run Maxima and convert the expression to LaTeX
+        maxima_input = f"tex({expression});"
+        result = subprocess.run(["maxima", "--very-quiet", "-r", maxima_input], capture_output=True, text=True)
+
+        output = result.stdout.strip()
+        if "Maxima" in output or "error" in output.lower():
+            return "Error in rendering."
+        return output
+    except Exception as e:
+        return f"Error processing LaTeX: {str(e)}"
 
 @socketio.on('send_image')
 def handle_send_image(data):
     try:
-        # data["image"] is assumed to be a data URL (e.g. "data:image/png;base64,....")
-        image_data = data["image"].split(",")[1]  # Remove the header part
-        # Process the image as before
+        image_data = data["image"].split(",")[1]  
         image = Image.open(BytesIO(base64.b64decode(image_data)))
         image = image.convert("RGBA")
         background = Image.new("RGBA", image.size, (255, 255, 255, 255))
@@ -73,7 +89,6 @@ def handle_send_image(data):
         base64_str = base64.b64encode(image_bytes).decode('utf-8')
         
         result = process_message(base64_str)
-        # Emit the result back to the client
         emit("maxima_code", result)
     except Exception as e:
         emit("maxima_code", {"status": "error", "message": str(e)})
