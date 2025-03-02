@@ -64,7 +64,9 @@ def process_message(data):
 def maxima_to_latex(expression):
 
     try:
-        maxima_code = f'apply(tex, [{expression}]);'
+        maxima_code = f'string(apply(tex, [{expression}])); quit();'
+        
+        
 
         result = subprocess.run(["maxima", "--batch-string", maxima_code], capture_output=True, text=True)
         
