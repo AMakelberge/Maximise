@@ -12,6 +12,15 @@ let isProcessing = false;
 let drawing = false;
 let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints;
 
+canvas.width = 500;
+canvas.height = 300;
+ctx.fillStyle = "white";
+ctx.fillRect(0,0,canvas.width, canvas.height)
+
+// Prevent scrolling when touching the canvas.
+canvas.addEventListener("touchstart", (event) => event.preventDefault(), { passive: false });
+canvas.addEventListener("touchmove", (event) => event.preventDefault(), { passive: false });
+
 if (isTouchDevice) {
     canvas.addEventListener("touchstart", startDrawing);
     canvas.addEventListener("touchmove", draw);
@@ -72,4 +81,6 @@ socket.on("maxima_code", function(data) {
 
 clearButton.addEventListener("click", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    codeField.innerText = "Awaiting input.";
+    renderedField.innerHTML = `Awaiting input.`;
 });
