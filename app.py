@@ -54,8 +54,13 @@ def process_message(data):
         reply = re.sub(r"\s*```$", "", reply).replace(" ", "").replace(";", "")
         if reply.startswith("(expr:"):
             reply = reply.replace("(expr:","")[:-1]
+        if reply.startswith("A:"):
+            reply = reply.replace("A:","")
         # Convert Maxima code to LaTeX
         latex_result = maxima_to_latex(reply)
+
+        if "undefined" in latex_result:
+            return {"status": "success", "reply": reply, "latex": ""}
 
         return {"status": "success", "reply": reply, "latex": latex_result}
     except Exception as e:
