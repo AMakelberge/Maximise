@@ -3,6 +3,8 @@ FROM ubuntu:20.04
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
+ENV OPENAI_API_KEY="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"
+ENV PORT=8765
 
 # Update apt-get and install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -40,4 +42,4 @@ COPY . /app
 EXPOSE 5000
 
 # Set the entrypoint to run your app using gunicorn with the GeventWebSocketWorker.
-CMD ["gunicorn", "app:app", "--worker-class", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", "--bind", "0.0.0.0:$PORT"]
+CMD ["sh", "-c", "gunicorn app:app --worker-class geventwebsocket.gunicorn.workers.GeventWebSocketWorker --bind 0.0.0.0:$PORT"]
