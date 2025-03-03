@@ -7,6 +7,9 @@ from PIL import Image
 from openai import OpenAI
 from dotenv import load_dotenv
 import subprocess
+import logging
+logging.basicConfig(level=logging.INFO)
+logging.info("Starting app...")
 
 load_dotenv(override=True)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
