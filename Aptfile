@@ -7,4 +7,4 @@ liblcms2-dev
 libopenjp2-7-dev
 libtiff5-dev
 libwebp-dev
-maxima=5.47.0-1
+maxima
