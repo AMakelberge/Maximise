@@ -9,7 +9,7 @@ const socket = io();
 
 socket.on("disconnect", (reason) => {
     console.log("Socket disconnected:", reason);
-    location.reload()
+    //location.reload()
     //alert("The connection has been lost (" + reason + "). Please reload the page to reconnect.");
   });
 
