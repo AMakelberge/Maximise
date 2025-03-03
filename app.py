@@ -1,9 +1,8 @@
-import builtins
-try:
-    # Allow eventlet to set an attribute on TimeoutError
-    setattr(builtins.TimeoutError, "is_timeout", False)
-except Exception as e:
-    print("Monkey-patching TimeoutError failed:", e)
+# Patch Eventlet's wsgi module to define ALREADY_HANDLED if it doesn't exist.
+import eventlet.wsgi
+if not hasattr(eventlet.wsgi, "ALREADY_HANDLED"):
+    eventlet.wsgi.ALREADY_HANDLED = object()
+    
 import io
 import json, base64, re, os
 from flask import Flask, render_template
