@@ -56,6 +56,8 @@ def process_message(data):
             reply = reply.replace("(expr:","")[:-1]
         if reply.startswith("A:"):
             reply = reply.replace("A:","")
+
+        print(reply)
         # Convert Maxima code to LaTeX
         latex_result = maxima_to_latex(reply)
 
@@ -76,6 +78,7 @@ def maxima_to_latex(expression):
         result = subprocess.run(["maxima", "--batch-string", maxima_code], capture_output=True, text=True)
         
         match = re.search(r"\$\$(.*?)\$\$", result.stdout, re.DOTALL)
+        print(result)
         if match:
             latex_output = r"\[" + match.group(1).strip() + r"\]"
             return latex_output
