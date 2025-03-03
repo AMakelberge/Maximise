@@ -77,7 +77,7 @@ def maxima_to_latex(expression):
         
         match = re.search(r"\$\$(.*?)\$\$", result.stdout, re.DOTALL)
         if match:
-            latex_output = "\[" + match.group(1).strip() + "\]"
+            latex_output = r"\[" + match.group(1).strip() + r"\]"
             return latex_output
         else:
             return result
