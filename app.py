@@ -13,7 +13,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, async_mode="eventlet")
+socketio = SocketIO(app, async_mode="eventlet", ping_timeout=600, ping_interval=300)
 
 @app.route("/")
 def index():
@@ -106,4 +106,8 @@ def handle_send_image(data):
         emit("maxima_code", {"status": "error", "message": str(e)})
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=8765, debug=True)
+    socketio.run(
+        app, 
+        host="0.0.0.0", 
+        port=8765, 
+        debug=True)
