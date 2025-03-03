@@ -7,6 +7,12 @@ let submitButton = document.getElementById("submitButton");
 
 const socket = io();
 
+socket.on("disconnect", (reason) => {
+    console.log("Socket disconnected:", reason);
+
+    alert("The connection has been lost (" + reason + "). Please reload the page to reconnect.");
+  });
+
 let debounceTimer;
 const DEBOUNCE_DELAY = 500;
 let isProcessing = false;

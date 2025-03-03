@@ -13,7 +13,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, async_mode="eventlet", ping_timeout=600, ping_interval=300)
+socketio = SocketIO(app, async_mode="eventlet")
 
 @app.route("/")
 def index():
