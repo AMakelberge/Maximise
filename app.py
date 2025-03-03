@@ -86,7 +86,7 @@ def maxima_to_latex(expression):
             latex_output = r"\[" + match.group(1).strip() + r"\]"
             return latex_output
         else:
-            return result
+            return result.stdout
     except Exception as e:
         return f"Error processing LaTeX: {e}"
 
