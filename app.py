@@ -73,31 +73,27 @@ def process_message(data):
 
 def maxima_to_latex(expression):
     try:
-        # Use hold() to prevent simplification, if desired.
-        maxima_code = f'set(prompt,""); set(echo,false); string(tex(hold({expression}))); quit();'
+        maxima_code = f'string(tex({expression})); quit();'
+        print("Running Maxima command:", maxima_code)
+
         result = subprocess.run(
             ["maxima", "--batch-string", maxima_code],
             capture_output=True, text=True
         )
-        # Debug: print the raw output from Maxima
+
+        # Debugging: Print Maxima output
         print("Maxima stdout:", result.stdout)
         print("Maxima stderr:", result.stderr)
-        
+
         if result.returncode != 0:
             return f"Error: Maxima exited with code {result.returncode}. stderr: {result.stderr}"
-        
-        # Try to match output wrapped in $$ markers
+
+        # Try extracting the LaTeX output
         match = re.search(r"\$\$(.*?)\$\$", result.stdout, re.DOTALL)
         if match:
-            latex_output = r"\[" + match.group(1).strip() + r"\]"
-            return latex_output
+            return r"\[" + match.group(1).strip() + r"\]"
         else:
-            # If no $$ markers, check if there is any non-empty output
-            if result.stdout.strip():
-                # Optionally, wrap the output in display math delimiters
-                return r"\[" + result.stdout.strip() + r"\]"
-            else:
-                return ""
+            return result.stdout.strip()
     except Exception as e:
         return f"Error processing LaTeX: {e}"
 
