@@ -5,7 +5,10 @@ let renderedField = document.getElementById("maximaRendered");
 let clearButton = document.getElementById("clearButton");
 let submitButton = document.getElementById("submitButton");
 
-const socket = io();
+const socket = io({
+    transports: ["websocket"],
+    upgrade: false  // prevents the fallback to polling
+  });
 
 socket.on("disconnect", (reason) => {
     console.log("Socket disconnected:", reason);
