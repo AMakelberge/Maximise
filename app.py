@@ -1,10 +1,9 @@
 import builtins
-# Monkey-patch TimeoutError to allow setting is_timeout.
-if not hasattr(builtins.TimeoutError, "is_timeout"):
-    try:
-        setattr(builtins.TimeoutError, "is_timeout", False)
-    except Exception as e:
-        print("Could not patch TimeoutError:", e)
+try:
+    # Allow eventlet to set an attribute on TimeoutError
+    setattr(builtins.TimeoutError, "is_timeout", False)
+except Exception as e:
+    print("Monkey-patching TimeoutError failed:", e)
 import io
 import json, base64, re, os
 from flask import Flask, render_template
