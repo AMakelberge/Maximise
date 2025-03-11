@@ -1,12 +1,12 @@
 import io
-import json, base64, re, os
+import base64, re, os
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 from io import BytesIO
 from PIL import Image
 from openai import OpenAI
 from dotenv import load_dotenv
-import subprocess
+import compiler
 import logging
 logging.basicConfig(level=logging.INFO)
 logging.info("Starting app...")
@@ -17,6 +17,8 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, ping_timeout=600, ping_interval=300)
+
+converter = compiler.MaximaToLatex()
 
 @app.route("/")
 def index():
@@ -30,6 +32,7 @@ def process_message(data):
             "Your task is to extract the mathematical expression and convert it into the syntax for the symbolic mathematics package Maxima. "
             "Make special care of subscripts which should be written using an underscore if you find a subscript. "
             "Return only the Maxima code with no additional text, explanations, or formatting."
+            "Additionally return the LaTeX version of the Maxima code after the Maxima code, this should be separated by a comma with no additional text, explanations, or formatting."
         )
         messages = [
             {"role": "system", "content": "You are a helpful assistant that outputs only code when requested."},
@@ -61,42 +64,16 @@ def process_message(data):
             reply = reply.replace("A:","")
 
         print(reply)
+        maxima, latex = reply.split(",")
         # Convert Maxima code to LaTeX
-        latex_result = maxima_to_latex(reply)
+        #latex_result = converter.convert(reply)
 
-        if "undefined" in latex_result:
-            return {"status": "success", "reply": reply, "latex": ""}
+        #if "undefined" in latex_result:
+        #    return {"status": "success", "reply": reply, "latex": ""}
 
-        return {"status": "success", "reply": reply, "latex": latex_result}
+        return {"status": "success", "reply": maxima, "latex": "$$" + latex + "$$"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
-
-def maxima_to_latex(expression):
-    try:
-        maxima_code = f'string(tex({expression})); quit();'
-        print("Running Maxima command:", maxima_code)
-
-        result = subprocess.run(
-            ["maxima", "--batch-string", maxima_code],
-            capture_output=True, text=True
-        )
-
-        # Debugging: Print Maxima output
-        print("Maxima stdout:", result.stdout)
-        print("Maxima stderr:", result.stderr)
-
-        if result.returncode != 0:
-            return f"Error: Maxima exited with code {result.returncode}. stderr: {result.stderr}"
-
-        # Try extracting the LaTeX output
-        match = re.search(r"\$\$(.*?)\$\$", result.stdout, re.DOTALL)
-        if match:
-            return r"\[" + match.group(1).strip() + r"\]"
-        else:
-            return result.stdout.strip()
-    except Exception as e:
-        return f"Error processing LaTeX: {e}"
-
 
 @socketio.on('send_image')
 def handle_send_image(data):
