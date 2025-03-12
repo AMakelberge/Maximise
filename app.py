@@ -33,6 +33,7 @@ def process_message(data):
             "Make special care of subscripts which should be written using an underscore if you find a subscript. "
             "Return only the Maxima code with no additional text, explanations, or formatting."
             "Additionally return the LaTeX version of the Maxima code after the Maxima code, this should be separated by a colon with no additional text, explanations, or formatting."
+            "All code should be directly translated from the drawn image, you should add no new maths terms in."
             "Return one single line only containing the raw maxima code, a colon, then the raw latex code."
         )
         messages = [
