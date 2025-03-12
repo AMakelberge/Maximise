@@ -32,7 +32,8 @@ def process_message(data):
             "Your task is to extract the mathematical expression and convert it into the syntax for the symbolic mathematics package Maxima. "
             "Make special care of subscripts which should be written using an underscore if you find a subscript. "
             "Return only the Maxima code with no additional text, explanations, or formatting."
-            "Additionally return the LaTeX version of the Maxima code after the Maxima code, this should be separated by a comma with no additional text, explanations, or formatting."
+            "Additionally return the LaTeX version of the Maxima code after the Maxima code, this should be separated by a colon with no additional text, explanations, or formatting."
+            "Return one single line only containing the raw maxima code, a colon, then the raw latex code."
         )
         messages = [
             {"role": "system", "content": "You are a helpful assistant that outputs only code when requested."},
@@ -56,15 +57,16 @@ def process_message(data):
             temperature=0.0
         )
         reply = response.choices[0].message.content.strip()
-        reply = re.sub(r"^```(?:\w+)?\s*", "", reply)
-        reply = re.sub(r"\s*```$", "", reply).replace(" ", "").replace(";", "")
+        print(reply)
+        reply = re.sub(r"^```(?:\w+)?\s*", "", reply).replace(r"\[", "").replace(r"\]", "")
+        reply = re.sub(r"\s*```$", "", reply).replace("`","").replace(";", "")
         if reply.startswith("(expr:"):
             reply = reply.replace("(expr:","")[:-1]
         if reply.startswith("A:"):
             reply = reply.replace("A:","")
 
         print(reply)
-        maxima, latex = reply.split(",")
+        maxima, latex = reply.split(":")
         # Convert Maxima code to LaTeX
         #latex_result = converter.convert(reply)
 
@@ -73,6 +75,8 @@ def process_message(data):
 
         return {"status": "success", "reply": maxima, "latex": "$$" + latex + "$$"}
     except Exception as e:
+        print('bob')
+        print(e)
         return {"status": "error", "message": str(e)}
 
 @socketio.on('send_image')
