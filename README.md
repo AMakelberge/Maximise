@@ -1,8 +1,3 @@
 # Maximise
 
-How to run:
-```bash
-git clone
-run app.py
-connect to your ip on port 8765
-```
+Go to alexmakelberge.com to see the project run!
