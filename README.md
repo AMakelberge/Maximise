@@ -1,3 +1,3 @@
 # Maximise
 
-Go to [alexmakelberge.com](alexmakelberge.com) to see the project run!
+Go to [alexmakelberge.com](https://alexmakelberge.com) to see the project run!
